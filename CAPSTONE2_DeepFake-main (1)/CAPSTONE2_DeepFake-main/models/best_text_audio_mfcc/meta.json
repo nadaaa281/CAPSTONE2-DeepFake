@@ -1,0 +1,12 @@
+{
+  "sr": 16000,
+  "n_mfcc": 13,
+  "label_map": {
+    "real": 0,
+    "fake": 1
+  },
+  "inverse_label_map": {
+    "0": "real",
+    "1": "fake"
+  }
+}

@@ -1,0 +1,94 @@
+/* ====== Cyber Pro UI ====== */
+:root{
+  --bg:#070a12;
+  --panel:#0e1426;
+  --panel2:#0b1020;
+  --border:rgba(0,255,225,.22);
+  --text:#e6e6e6;
+  --muted:rgba(230,230,230,.75);
+  --cyan:#00ffe1;
+  --pink:#ff2bd6;
+  --green:#00ff9c;
+  --red:#ff4d6d;
+  --shadow:0 10px 28px rgba(0,0,0,.45);
+}
+
+.block-container{padding-top:1.6rem;padding-bottom:2.5rem;max-width:1180px;}
+h1,h2,h3{letter-spacing:.2px;}
+small, .caption{color:var(--muted);}
+
+a,a:visited{color:var(--pink);}
+
+/* Sidebar */
+section[data-testid="stSidebar"]{
+  background: linear-gradient(180deg, rgba(255,43,214,.06), rgba(0,255,225,.04));
+  border-right: 1px solid rgba(0,255,225,.12);
+}
+
+/* Buttons */
+.stButton>button{
+  background: linear-gradient(90deg, var(--pink), var(--cyan));
+  color:#05060a;
+  border:none;
+  border-radius:14px;
+  font-weight:900;
+  height:3.1em;
+  box-shadow: 0 12px 22px rgba(0,0,0,.35);
+}
+.stButton>button:hover{filter:brightness(1.02); transform: translateY(-1px);}
+.stButton>button:active{transform: translateY(0);}
+
+/* Cards */
+.df-card{
+  background: radial-gradient(1200px 500px at 0% 0%, rgba(0,255,225,.10), transparent 60%),
+              radial-gradient(900px 400px at 100% 0%, rgba(255,43,214,.10), transparent 55%),
+              var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 18px 18px 16px 18px;
+  box-shadow: var(--shadow);
+}
+
+.df-card-plain{
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.df-kpi{
+  display:flex; gap:14px; flex-wrap:wrap; margin-top:10px;
+}
+.df-kpi .item{
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(0,255,225,.12);
+  border-radius: 14px;
+  padding: 10px 12px;
+  min-width: 200px;
+}
+.df-kpi .label{color:var(--muted); font-size:12px;}
+.df-kpi .value{font-size:18px; font-weight:800; margin-top:2px;}
+
+.df-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:900;
+  letter-spacing:.8px;
+}
+.df-badge.real{border:1px solid rgba(0,255,156,.55); color:var(--green); background:rgba(0,255,156,.08);}
+.df-badge.fake{border:1px solid rgba(255,77,109,.55); color:var(--red); background:rgba(255,77,109,.08);}
+
+.df-hr{
+  height:1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,225,.30), transparent);
+  margin: 14px 0;
+}
+
+.df-mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  white-space: pre-wrap;
+  color: rgba(230,230,230,.92);
+}

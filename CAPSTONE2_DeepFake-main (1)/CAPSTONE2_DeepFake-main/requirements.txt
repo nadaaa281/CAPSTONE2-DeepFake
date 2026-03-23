@@ -1,0 +1,11 @@
+streamlit
+numpy
+scipy
+scikit-learn
+joblib
+librosa
+soundfile
+openai-whisper
+torch
+torchvision
+tiktoken
