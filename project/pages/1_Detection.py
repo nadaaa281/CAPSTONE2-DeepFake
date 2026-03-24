@@ -10,6 +10,8 @@ st.set_page_config(page_title="Detection", page_icon="🔍", layout="wide")
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 with open(os.path.join(BASE_DIR, "assets/cyber.css")) as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 
 mode = st.selectbox("Select media type", ["Video", "Image", "Audio"])
 
