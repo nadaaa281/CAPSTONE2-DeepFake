@@ -10,3 +10,7 @@ torch
 torchvision
 tiktoken
 openai
+reportlab
+reportlab
+reportlab
+reportlab
