@@ -10,7 +10,7 @@ from scipy.sparse import hstack, csr_matrix
 
 import whisper  # Python API (reliable on Streamlit Cloud)
 
-MODEL_DIR = Path("models/best_text_audio_mfcc")
+MODEL_DIR = Path(__file__).parent.parent / "models" / "best_text_audio_mfcc"
 _WHISPER_MODEL = None
 
 def load_bundle():
