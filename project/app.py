@@ -5,7 +5,7 @@ st.set_page_config(page_title="Deepfake Detector", page_icon="🛡️", layout="
 import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 with open(os.path.join(BASE_DIR, "assets/cyber.css")) as f:
-st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Top bar
 top_l, top_r = st.columns([3, 1], vertical_alignment="top")
