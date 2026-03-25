@@ -1,5 +1,5 @@
-import os
-from openai import OpenAI
+import streamlit as st
+api_key = st.secrets["OPENAI_API_KEY"]
 
 # Use environment variable instead of hardcoding
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
