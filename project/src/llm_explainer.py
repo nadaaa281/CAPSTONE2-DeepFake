@@ -1,8 +1,10 @@
+import os
 import streamlit as st
-api_key = st.secrets["OPENAI_API_KEY"]
+from openai import OpenAI
 
-# Use environment variable instead of hardcoding
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Works for both local and Streamlit Cloud
+api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 def generate_explanation(transcript, real_prob, fake_prob):
     prompt = f"""
@@ -27,7 +29,7 @@ Keep the explanation concise (3–5 lines).
 """
 
     response = client.chat.completions.create(
-        model="gpt-4.1-mini",
+        model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.4
     )
