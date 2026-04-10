@@ -14,3 +14,5 @@ reportlab
 reportlab
 reportlab
 reportlab
+dash>=2.16.0
+plotly>=5.20.0
