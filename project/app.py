@@ -3,10 +3,8 @@ st.set_page_config(page_title="Deepfake Detector", page_icon="🛡️", layout="
 
 import plotly.graph_objects as go
 
-# ── CSS: full dark panel design ───────────────────────────────────────────────
 st.markdown("""
 <style>
-/* Page background */
 html, body,
 [data-testid="stAppViewContainer"],
 [data-testid="stMain"],
@@ -14,172 +12,93 @@ html, body,
     background-color: #0E0E11 !important;
     color: #E2E2E2 !important;
 }
-
 [data-testid="block-container"] {
-    padding: 20px 28px 48px !important;
-    max-width: 100% !important;
+    padding: 24px 32px 48px !important;
+    max-width: 860px !important;
+    margin: 0 auto !important;
 }
-
-/* Hide Streamlit chrome */
 #MainMenu, footer, header { visibility: hidden !important; }
 [data-testid="stToolbar"]  { display: none !important; }
 [data-testid="stDecoration"] { display: none !important; }
-
-/* Kill default white borders on containers */
 [data-testid="stVerticalBlock"] > [data-testid="element-container"] > div {
     background: transparent !important;
 }
-
-/* Column layout */
-[data-testid="stHorizontalBlock"] {
-    gap: 10px !important;
-    align-items: stretch !important;
-}
+[data-testid="stHorizontalBlock"] { gap: 0px !important; align-items: stretch !important; }
 [data-testid="stColumn"] { padding: 0 !important; }
 
-/* ── Radio as dark tab strip ── */
+/* Radio as pill tabs */
 [data-testid="stRadio"] > div {
     flex-direction: row !important;
-    gap: 3px !important;
-    background: #1A1A22 !important;
-    padding: 4px !important;
-    border-radius: 9px !important;
-    width: fit-content !important;
-    border: 0.5px solid rgba(255,255,255,0.07) !important;
-    margin-bottom: 12px !important;
+    gap: 6px !important;
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    margin-bottom: 0 !important;
 }
 [data-testid="stRadio"] label {
-    background: transparent !important;
-    border-radius: 6px !important;
-    padding: 5px 18px !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    color: #666 !important;
+    background: #1C1C26 !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 8px !important;
+    padding: 6px 20px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #888 !important;
     cursor: pointer !important;
-    border: none !important;
 }
 [data-testid="stRadio"] label:has(input:checked) {
-    background: #22223A !important;
-    color: #AFA9EC !important;
-    font-weight: 600 !important;
-    border: 0.5px solid rgba(127,119,221,0.25) !important;
+    background: #1C1C26 !important;
+    color: #E2E2E2 !important;
+    border: 1px solid rgba(255,255,255,0.35) !important;
 }
-/* hide the radio circle */
 [data-testid="stRadio"] [data-testid="stMarkdownContainer"] p { display: none; }
 [data-testid="stRadio"] input[type="radio"] { display: none !important; }
 
-/* ── Buttons ── */
+/* Buttons */
 .stButton > button {
-    width: 100% !important;
-    background: #1A1A22 !important;
-    border: 0.5px solid rgba(255,255,255,0.08) !important;
+    background: #1A1A26 !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
     border-radius: 8px !important;
     color: #ABABBB !important;
     font-size: 12px !important;
     font-weight: 500 !important;
-    padding: 9px 14px !important;
-    text-align: left !important;
+    padding: 8px 16px !important;
 }
 .stButton > button:hover {
     background: #22222E !important;
-    border-color: rgba(255,255,255,0.15) !important;
+    border-color: rgba(255,255,255,0.22) !important;
     color: #E2E2E2 !important;
 }
 
-/* ── Plotly chart containers ── */
-[data-testid="stPlotlyChart"] {
-    background: transparent !important;
-    border: none !important;
+/* ── OUTER SHELL ── */
+.shell {
+    background: #17171F;
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 16px;
+    overflow: hidden;
 }
 
-/* ── Panel card ── */
-.panel {
-    background: #16161E;
-    border: 0.5px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    padding: 18px 22px;
-    height: 100%;
-    box-sizing: border-box;
-}
-
-/* ── Micro label ── */
-.micro {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: #444;
-    margin-bottom: 12px;
-}
-
-/* ── Score ── */
-.score-num {
-    font-size: 62px;
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -2px;
-    margin-bottom: 4px;
-}
-.score-lbl { font-size: 12px; color: #555; margin-bottom: 14px; }
-
-/* ── Verdict pill ── */
-.pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-}
-.pill-fake   { background: rgba(226,75,74,0.15);  color: #F09595; }
-.pill-real   { background: rgba(29,158,117,0.15); color: #5DCAA5; }
-.pill-unsure { background: rgba(239,159,39,0.15); color: #FAC775; }
-
-/* ── Meter ── */
-.meter { margin-top: 18px; }
-.meter-hd {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: #444;
-    margin-bottom: 4px;
-}
-.meter-track { height: 3px; background: #1E1E28; border-radius: 2px; }
-.meter-fill  { height: 100%; border-radius: 2px; }
-.meter-vals  {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 4px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-/* ── Header bar ── */
-.db-header {
+/* ── TOP BAR ── */
+.topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #16161E;
-    border: 0.5px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    padding: 14px 22px;
-    margin-bottom: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.brand      { display: flex; align-items: center; gap: 12px; }
-.shield {
-    width: 38px; height: 38px; border-radius: 10px;
+.brand { display: flex; align-items: center; gap: 10px; }
+.shield-icon {
+    width: 34px; height: 34px; border-radius: 8px;
     background: #26215C;
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
 }
-.brand-name { font-size: 15px; font-weight: 700; color: #E2E2E2; margin: 0; }
+.brand-name { font-size: 14px; font-weight: 700; color: #E2E2E2; margin: 0; line-height: 1.2; }
 .brand-sub  { font-size: 11px; color: #444; margin: 0; }
-.online-pill {
-    display: inline-flex; align-items: center; gap: 6px;
+.sys-online {
+    display: inline-flex; align-items: center; gap: 5px;
     background: rgba(99,153,34,0.15); color: #97C459;
     font-size: 11px; font-weight: 600;
-    padding: 5px 14px; border-radius: 20px;
+    padding: 4px 12px; border-radius: 20px;
 }
 .live-dot {
     width: 6px; height: 6px; border-radius: 50%;
@@ -188,192 +107,244 @@ html, body,
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-/* ── Event log ── */
-.ev-list { display: flex; flex-direction: column; }
+/* ── SECTION LABEL ── */
+.sec-label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .10em; text-transform: uppercase;
+    color: #555; margin-bottom: 12px;
+}
+
+/* ── VERDICT PANEL ── */
+.verdict-score {
+    font-size: 68px; font-weight: 700;
+    line-height: 1; letter-spacing: -3px;
+    margin-bottom: 2px;
+}
+.verdict-sub { font-size: 12px; color: #555; margin-bottom: 14px; }
+.pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; margin-bottom: 16px;
+}
+.pill-fake   { background: rgba(226,75,74,0.15);  color: #F09595; }
+.pill-real   { background: rgba(29,158,117,0.15); color: #5DCAA5; }
+.pill-unsure { background: rgba(239,159,39,0.15); color: #FAC775; }
+
+.meter-row { margin-top: 8px; }
+.meter-hd {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: #444; margin-bottom: 4px;
+}
+.meter-track { height: 2px; background: #222230; border-radius: 2px; margin-bottom: 3px; }
+.meter-fill  { height: 100%; border-radius: 2px; }
+.meter-vals {
+    display: flex; justify-content: space-between;
+    font-size: 12px; font-weight: 600;
+}
+
+/* ── FORENSIC SIGNALS GRID ── */
+.sig-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+.sig-cell {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255,255,255,0.04);
+}
+.sig-cell:nth-child(2n) { border-right: none; }
+.sig-cell:nth-last-child(-n+2) { border-bottom: none; }
+.sig-row {
+    display: flex; justify-content: space-between;
+    align-items: baseline; margin-bottom: 3px;
+}
+.sig-name { font-size: 13px; font-weight: 600; color: #D8D8E4; }
+.sig-pct  { font-size: 13px; font-weight: 700; }
+.sig-desc { font-size: 11px; color: #555; margin-bottom: 6px; }
+.sig-bar-track { height: 2px; background: #1E1E2A; border-radius: 2px; }
+.sig-bar-fill  { height: 100%; border-radius: 2px; }
+
+/* ── DIVIDER ── */
+.hdivider { height: 1px; background: rgba(255,255,255,0.05); }
+.vdivider { width: 1px; background: rgba(255,255,255,0.05); }
+
+/* ── DETECTION EVENTS ── */
 .ev-item {
     display: flex; gap: 10px;
     padding: 10px 0;
-    border-bottom: 0.5px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
 }
-.ev-item:first-child { padding-top: 0; }
-.ev-item:last-child  { border-bottom: none; padding-bottom: 0; }
-.ev-dot   { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-.ev-title { font-size: 12px; font-weight: 600; color: #D0D0DC; }
+.ev-item:last-child { border-bottom: none; padding-bottom: 0; }
+.ev-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.ev-title { font-size: 12px; font-weight: 600; color: #D0D0DC; line-height: 1.3; }
 .ev-sub   { font-size: 11px; color: #555; margin-top: 1px; }
 
-/* ── Footer strip ── */
-.db-footer {
+/* ── CONFIDENCE BREAKDOWN ── */
+.conf-item { margin-bottom: 12px; }
+.conf-item:last-child { margin-bottom: 0; }
+.conf-row {
+    display: flex; justify-content: space-between;
+    font-size: 13px; margin-bottom: 4px;
+}
+.conf-name { color: #C0C0CC; font-weight: 500; }
+.conf-pct  { font-weight: 700; }
+.conf-track { height: 2px; background: #1E1E2A; border-radius: 2px; }
+.conf-fill  { height: 100%; border-radius: 2px; }
+
+/* ── FOOTER STRIP ── */
+.foot-strip {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    background: #16161E;
-    border: 0.5px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    padding: 14px 22px;
-    margin-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 14px 20px;
 }
-.foot-cell {
-    padding: 0 20px;
-    border-left: 0.5px solid rgba(255,255,255,0.05);
-}
+.foot-cell { padding: 0 18px; border-left: 1px solid rgba(255,255,255,0.05); }
 .foot-cell:first-child { padding-left: 0; border-left: none; }
-.foot-key { font-size: 10px; font-weight: 600; letter-spacing:.07em; text-transform:uppercase; color:#444; margin-bottom:3px; }
+.foot-key {
+    font-size: 10px; font-weight: 700; letter-spacing:.08em;
+    text-transform: uppercase; color: #444; margin-bottom: 3px;
+}
 .foot-val { font-size: 13px; font-weight: 600; color: #C0C0CC; }
 .foot-sub { font-size: 11px; color: #555; }
-
-.spacer { height: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Data ──────────────────────────────────────────────────────────────────────
+# ── Data ─────────────────────────────────────────────────────────────────────
 CLIPS = {
     "VID-9042": {
         "fake": 97.3, "real": 2.7, "verdict": "fake",
-        "signals": {
-            "Lip desync": 91, "MFCC variance": 87,
-            "Face geometry": 72, "Audio splice": 98,
-            "Transcript": 31,  "Noise print": 44,
-        },
+        "signals": [
+            ("Lip desync",     91, "#E24B4A", "4.84ms lag detected"),
+            ("MFCC variance",  87, "#E24B4A", "Unnaturally smooth speech"),
+            ("Face geometry",  72, "#EF9F27", "Drift at frames 47–62"),
+            ("Audio splice",   68, "#EF9F27", "Cut at 0:03–0:07"),
+            ("Noise print",    44, "#EF9F27", "Environment mismatch"),
+            ("Transcript",     31, "#639922", "99.2% match — clean"),
+        ],
+        "confidence": [
+            ("Audio",      79, "#E24B4A"),
+            ("Visual",     81, "#E24B4A"),
+            ("Sync",       91, "#E24B4A"),
+            ("Transcript", 22, "#639922"),
+        ],
         "events": [
-            ("Audio splice at 0:03–0:07", "Confidence 98.1%",     "#E24B4A"),
-            ("Lip desync detected",        "4.84ms average lag",   "#E24B4A"),
-            ("MFCC anomaly flagged",        "Frames 47–62",         "#EF9F27"),
-            ("Transcript parsed",           "Whisper — 99.2% WER", "#639922"),
+            ("Audio splice detected",  "Timestamp 0:03–0:07 · 98.1% confidence", "#E24B4A"),
+            ("Lip desync flagged",     "4.84ms average lag · 23 frames affected", "#EF9F27"),
+            ("MFCC anomaly",           "Frames 47–62 · 6 coefficient bands",      "#EF9F27"),
+            ("Transcript parsed",      "Whisper large-v3 · 99.2% accuracy",       "#639922"),
         ],
     },
     "VID-9041": {
         "fake": 4.2, "real": 95.8, "verdict": "real",
-        "signals": {
-            "Lip desync": 9,  "MFCC variance": 12,
-            "Face geometry": 8,  "Audio splice": 6,
-            "Transcript": 5,  "Noise print": 11,
-        },
+        "signals": [
+            ("Lip desync",    9,  "#1D9E75", "< 10ms lag — nominal"),
+            ("MFCC variance", 12, "#1D9E75", "Normal speech pattern"),
+            ("Face geometry", 8,  "#1D9E75", "No drift detected"),
+            ("Audio splice",  6,  "#1D9E75", "Clean waveform"),
+            ("Noise print",   11, "#1D9E75", "Consistent environment"),
+            ("Transcript",    5,  "#1D9E75", "High coherence"),
+        ],
+        "confidence": [
+            ("Audio",      8,  "#1D9E75"),
+            ("Visual",     6,  "#1D9E75"),
+            ("Sync",       9,  "#1D9E75"),
+            ("Transcript", 4,  "#1D9E75"),
+        ],
         "events": [
-            ("No splice detected", "Clean waveform",   "#639922"),
-            ("Lip sync nominal",   "< 10ms lag",        "#639922"),
-            ("MFCC normal",        "All frames clear",  "#639922"),
-            ("Transcript parsed",  "High coherence",    "#639922"),
+            ("No splice detected",  "Clean waveform throughout",     "#639922"),
+            ("Lip sync nominal",    "< 10ms lag across all frames",  "#639922"),
+            ("MFCC normal",         "All frames within normal range","#639922"),
+            ("Transcript parsed",   "High coherence score",          "#639922"),
         ],
     },
     "VID-9040": {
         "fake": 62.1, "real": 37.9, "verdict": "unsure",
-        "signals": {
-            "Lip desync": 48, "MFCC variance": 61,
-            "Face geometry": 38, "Audio splice": 55,
-            "Transcript": 42,  "Noise print": 57,
-        },
+        "signals": [
+            ("Lip desync",    48, "#EF9F27", "32ms avg — suspicious"),
+            ("MFCC variance", 61, "#EF9F27", "Elevated anomaly score"),
+            ("Face geometry", 38, "#EF9F27", "Minor drift detected"),
+            ("Audio splice",  55, "#EF9F27", "Possible cut at 0:11"),
+            ("Noise print",   57, "#EF9F27", "Slight mismatch"),
+            ("Transcript",    42, "#EF9F27", "Minor gaps noted"),
+        ],
+        "confidence": [
+            ("Audio",      55, "#EF9F27"),
+            ("Visual",     48, "#EF9F27"),
+            ("Sync",       61, "#EF9F27"),
+            ("Transcript", 38, "#EF9F27"),
+        ],
         "events": [
-            ("Inconclusive audio", "Mixed signals",     "#EF9F27"),
-            ("Lip lag detected",   "32ms avg",           "#EF9F27"),
-            ("MFCC elevated",      "Suspicious range",  "#EF9F27"),
-            ("Transcript gaps",    "Minor anomalies",   "#EF9F27"),
+            ("Inconclusive audio",  "Mixed signals — further review needed", "#EF9F27"),
+            ("Lip lag detected",    "32ms avg — borderline threshold",       "#EF9F27"),
+            ("MFCC elevated",       "Suspicious coefficient range",          "#EF9F27"),
+            ("Transcript gaps",     "Minor anomalies detected",              "#EF9F27"),
         ],
     },
 }
 
 COLOR_MAP = {
-    "fake":  {"score":"#E24B4A","fill":"rgba(226,75,74,0.18)",  "line":"#E24B4A","pill":"pill-fake",  "label":"Fake — high confidence"},
-    "real":  {"score":"#1D9E75","fill":"rgba(29,158,117,0.18)","line":"#1D9E75","pill":"pill-real",  "label":"Authentic — all clear"},
-    "unsure":{"score":"#EF9F27","fill":"rgba(239,159,39,0.18)","line":"#EF9F27","pill":"pill-unsure","label":"Probable fake — review needed"},
+    "fake":  {"score": "#E24B4A", "pill": "pill-fake",   "label": "Fake — high confidence"},
+    "real":  {"score": "#1D9E75", "pill": "pill-real",   "label": "Authentic — all clear"},
+    "unsure":{"score": "#EF9F27", "pill": "pill-unsure", "label": "Probable fake — review needed"},
 }
 
-def sig_color(v, verdict):
-    if verdict == "real": return "#1D9E75"
-    if v >= 70: return "#E24B4A"
-    if v >= 40: return "#EF9F27"
-    return "#1D9E75"
+# ── Header row: brand left, clip selector right ───────────────────────────────
+st.markdown('<div class="shell">', unsafe_allow_html=True)
 
-# ── Plotly radar ──────────────────────────────────────────────────────────────
-def build_radar(clip):
-    cm = COLOR_MAP[clip["verdict"]]
-    labels = list(clip["signals"].keys())
-    vals   = [v / 100 for v in clip["signals"].values()]
-    fig = go.Figure(go.Scatterpolar(
-        r=vals+[vals[0]], theta=labels+[labels[0]],
-        fill="toself", fillcolor=cm["fill"],
-        line=dict(color=cm["line"], width=2),
-        marker=dict(size=5, color=cm["line"]),
-    ))
-    fig.update_layout(
-        polar=dict(
-            bgcolor="rgba(0,0,0,0)",
-            radialaxis=dict(
-                visible=True, range=[0,1],
-                tickvals=[.25,.5,.75,1],
-                tickfont=dict(size=9, color="#444"),
-                gridcolor="rgba(255,255,255,0.05)",
-                linecolor="rgba(255,255,255,0.05)",
-            ),
-            angularaxis=dict(
-                tickfont=dict(size=11, color="#777"),
-                gridcolor="rgba(255,255,255,0.04)",
-                linecolor="rgba(255,255,255,0.05)",
-            ),
-        ),
-        showlegend=False,
-        margin=dict(l=55,r=55,t=24,b=24),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        height=268, font=dict(color="#777"),
-    )
-    return fig
+# Top bar with brand + clip tabs
+col_brand, col_tabs, col_status = st.columns([2.2, 3, 1.2], gap="small")
 
-# ── Plotly horizontal bar ─────────────────────────────────────────────────────
-def build_bar(clip):
-    labels = list(clip["signals"].keys())
-    vals   = list(clip["signals"].values())
-    colors = [sig_color(v, clip["verdict"]) for v in vals]
-    fig = go.Figure(go.Bar(
-        x=vals, y=labels, orientation="h",
-        marker=dict(color=colors, line_width=0),
-        text=[f"  {v}%" for v in vals],
-        textposition="outside",
-        textfont=dict(size=11, color="#666"),
-    ))
-    fig.update_layout(
-        xaxis=dict(range=[0,130], showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(tickfont=dict(size=11, color="#777"), showgrid=False, tickcolor="rgba(0,0,0,0)"),
-        margin=dict(l=8,r=52,t=4,b=4),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        height=226, showlegend=False, bargap=0.40,
-        font=dict(color="#666"),
-    )
-    return fig
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# LAYOUT
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# Header
-st.markdown("""
-<div class="db-header">
-  <div class="brand">
-    <div class="shield">🛡️</div>
-    <div>
-      <div class="brand-name">Deepfake Detector</div>
-      <div class="brand-sub">Multimodal forensic analysis · v2.4.1</div>
+with col_brand:
+    st.markdown("""
+    <div class="topbar" style="border-bottom:none;padding-right:0">
+      <div class="brand">
+        <div class="shield-icon">🛡️</div>
+        <div>
+          <div class="brand-name">Deepfake Detector</div>
+          <div class="brand-sub">Multimodal forensic analysis · v2.4.1</div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="online-pill"><span class="live-dot"></span> System online</div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-# Clip selector
-clip_id = st.radio("", list(CLIPS.keys()), horizontal=True, label_visibility="collapsed")
-clip    = CLIPS[clip_id]
-cm      = COLOR_MAP[clip["verdict"]]
+with col_tabs:
+    st.markdown('<div style="padding-top:16px">', unsafe_allow_html=True)
+    clip_id = st.radio("", list(CLIPS.keys()), horizontal=True, label_visibility="collapsed")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-# Row 1
-c1, c2, c3 = st.columns([1, 1.5, 1.7], gap="small")
+with col_status:
+    st.markdown("""
+    <div style="padding-top:18px;text-align:right">
+      <span class="sys-online"><span class="live-dot"></span> System online</span>
+    </div>
+    """, unsafe_allow_html=True)
 
-with c1:
+st.markdown('<div class="hdivider"></div>', unsafe_allow_html=True)
+
+clip = CLIPS[clip_id]
+cm   = COLOR_MAP[clip["verdict"]]
+
+# ── Row 1: Verdict | Forensic Signals ────────────────────────────────────────
+c_verdict, c_divv, c_signals = st.columns([1.1, 0.02, 2.4], gap="small")
+
+with c_verdict:
+    sigs_html = "".join([
+        f'<div class="sig-cell">'
+        f'<div class="sig-row"><span class="sig-name">{name}</span>'
+        f'<span class="sig-pct" style="color:{col}">{val}%</span></div>'
+        f'<div class="sig-desc">{desc}</div>'
+        f'<div class="sig-bar-track"><div class="sig-bar-fill" style="width:{val}%;background:{col}"></div></div>'
+        f'</div>'
+        for name, val, col, desc in clip["signals"]
+    ])
     st.markdown(f"""
-    <div class="panel">
-      <div class="micro">Verdict</div>
-      <div class="score-num" style="color:{cm['score']}">{clip['fake']:.1f}%</div>
-      <div class="score-lbl">Fake probability</div>
+    <div style="padding:18px 20px 12px">
+      <div class="sec-label">Verdict</div>
+      <div class="verdict-score" style="color:{cm['score']}">{clip['fake']:.1f}%</div>
+      <div class="verdict-sub">Fake probability</div>
       <span class="pill {cm['pill']}">● &nbsp;{cm['label']}</span>
-      <div class="meter">
+      <div class="meter-row">
         <div class="meter-hd"><span>Fake</span><span>Real</span></div>
         <div class="meter-track">
           <div class="meter-fill" style="width:{clip['fake']}%;background:{cm['score']}"></div>
@@ -386,25 +357,33 @@ with c1:
     </div>
     """, unsafe_allow_html=True)
 
-with c2:
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
-    st.markdown('<div class="micro">Signal radar</div>', unsafe_allow_html=True)
-    st.plotly_chart(build_radar(clip), use_container_width=True, config={"displayModeBar": False})
-    st.markdown('</div>', unsafe_allow_html=True)
+with c_divv:
+    st.markdown('<div class="vdivider" style="height:100%;min-height:220px"></div>', unsafe_allow_html=True)
 
-with c3:
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
-    st.markdown('<div class="micro">Forensic signal breakdown</div>', unsafe_allow_html=True)
-    st.plotly_chart(build_bar(clip), use_container_width=True, config={"displayModeBar": False})
-    st.markdown('</div>', unsafe_allow_html=True)
+with c_signals:
+    sigs_html = "".join([
+        f'<div class="sig-cell">'
+        f'<div class="sig-row"><span class="sig-name">{name}</span>'
+        f'<span class="sig-pct" style="color:{col}">{val}%</span></div>'
+        f'<div class="sig-desc">{desc}</div>'
+        f'<div class="sig-bar-track"><div class="sig-bar-fill" style="width:{val}%;background:{col}"></div></div>'
+        f'</div>'
+        for name, val, col, desc in clip["signals"]
+    ])
+    st.markdown(f"""
+    <div style="padding:18px 14px 12px 14px">
+      <div class="sec-label">Forensic Signals</div>
+      <div class="sig-grid">{sigs_html}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
+st.markdown('<div class="hdivider"></div>', unsafe_allow_html=True)
 
-# Row 2
-c4, c5, c6 = st.columns([2, 1.2, 0.9], gap="small")
+# ── Row 2: Detection Events | Confidence Breakdown ───────────────────────────
+c_events, c_divh, c_conf = st.columns([1.6, 0.02, 1], gap="small")
 
-with c4:
-    evts = "".join([
+with c_events:
+    evts_html = "".join([
         f'<div class="ev-item">'
         f'<div class="ev-dot" style="background:{dot}"></div>'
         f'<div><div class="ev-title">{msg}</div>'
@@ -412,63 +391,67 @@ with c4:
         for msg, sub, dot in clip["events"]
     ])
     st.markdown(f"""
-    <div class="panel">
-      <div class="micro">Detection events</div>
-      <div class="ev-list">{evts}</div>
+    <div style="padding:16px 20px">
+      <div class="sec-label">Detection Events</div>
+      {evts_html}
     </div>
     """, unsafe_allow_html=True)
 
-with c5:
-    st.markdown('<div class="panel">', unsafe_allow_html=True)
-    st.markdown('<div class="micro">Actions</div>', unsafe_allow_html=True)
-    st.button("📋  Generate evidence report", key="r", use_container_width=True)
-    st.button("🔍  Explain this detection",   key="e", use_container_width=True)
-    st.button("⚖️  Compare clips",             key="c", use_container_width=True)
-    st.button("📤  Upload new clip",           key="u", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+with c_divh:
+    st.markdown('<div class="vdivider" style="height:100%;min-height:180px"></div>', unsafe_allow_html=True)
 
-with c6:
+with c_conf:
+    conf_html = "".join([
+        f'<div class="conf-item">'
+        f'<div class="conf-row"><span class="conf-name">{name}</span>'
+        f'<span class="conf-pct" style="color:{col}">{val}%</span></div>'
+        f'<div class="conf-track"><div class="conf-fill" style="width:{val}%;background:{col}"></div></div>'
+        f'</div>'
+        for name, val, col in clip["confidence"]
+    ])
     st.markdown(f"""
-    <div class="panel">
-      <div class="micro">Model</div>
-      <div style="font-size:24px;font-weight:700;color:#D8D8E8;margin-bottom:2px">v2.4.1</div>
-      <div style="font-size:11px;color:#444;margin-bottom:16px">Whisper large-v3 · FFmpeg</div>
-      <div style="border-top:0.5px solid rgba(255,255,255,0.05);padding-top:14px;display:flex;flex-direction:column;gap:12px">
-        <div>
-          <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#444;margin-bottom:2px">Frames scanned</div>
-          <div style="font-size:18px;font-weight:700;color:#C0C0CC">47</div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#444;margin-bottom:2px">Processing time</div>
-          <div style="font-size:18px;font-weight:700;color:#C0C0CC">1.84s</div>
-        </div>
-        <div>
-          <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:#444;margin-bottom:2px">Resolution</div>
-          <div style="font-size:18px;font-weight:700;color:#C0C0CC">4K</div>
-        </div>
-      </div>
+    <div style="padding:16px 18px">
+      <div class="sec-label">Confidence Breakdown</div>
+      {conf_html}
     </div>
     """, unsafe_allow_html=True)
 
-# Footer
+st.markdown('<div class="hdivider"></div>', unsafe_allow_html=True)
+
+# ── Row 3: Action buttons ─────────────────────────────────────────────────────
+st.markdown('<div style="padding:12px 20px 14px;display:flex;gap:8px">', unsafe_allow_html=True)
+b1, b2, b3, _ = st.columns([1.2, 1.2, 1, 2], gap="small")
+with b1:
+    st.button("▪ Evidence report ↗", key="r")
+with b2:
+    st.button("◎ Explain signals ↗", key="e")
+with b3:
+    st.button("⚖ Compare clips ↗", key="c")
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('<div class="hdivider"></div>', unsafe_allow_html=True)
+
+# ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="db-footer">
+<div class="foot-strip">
   <div class="foot-cell">
-    <div class="foot-key">Model version</div>
+    <div class="foot-key">Model</div>
     <div class="foot-val">v2.4.1</div>
   </div>
   <div class="foot-cell">
-    <div class="foot-key">Audio engine</div>
+    <div class="foot-key">Audio Engine</div>
     <div class="foot-val">Whisper large-v3</div>
   </div>
   <div class="foot-cell">
-    <div class="foot-key">Video pipeline</div>
-    <div class="foot-val">FFmpeg + ResNet-50</div>
+    <div class="foot-key">Frames Scanned</div>
+    <div class="foot-val">47</div>
+    <div class="foot-sub">at 4K resolution</div>
   </div>
   <div class="foot-cell">
-    <div class="foot-key">Resolution</div>
-    <div class="foot-val">4K</div>
-    <div class="foot-sub">47 frames scanned</div>
+    <div class="foot-key">Processing Time</div>
+    <div class="foot-val">1.84s</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)  # close .shell
