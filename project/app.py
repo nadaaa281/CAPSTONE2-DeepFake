@@ -87,13 +87,13 @@ html, body,
 }
 .brand { display: flex; align-items: center; gap: 10px; }
 .shield-icon {
-    width: 34px; height: 34px; border-radius: 8px;
+    width: 48px; height: 48px; border-radius: 12px;
     background: #26215C;
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
+    font-size: 24px;
 }
-.brand-name { font-size: 14px; font-weight: 700; color: #E2E2E2; margin: 0; line-height: 1.2; }
-.brand-sub  { font-size: 11px; color: #444; margin: 0; }
+.brand-name { font-size: 18px; font-weight: 700; color: #E2E2E2; margin: 0; line-height: 1.3; }
+.brand-sub  { font-size: 13px; color: #555; margin: 0; }
 .sys-online {
     display: inline-flex; align-items: center; gap: 5px;
     background: rgba(99,153,34,0.15); color: #97C459;
@@ -297,7 +297,7 @@ col_brand, col_tabs, col_status = st.columns([2.2, 3, 1.2], gap="small")
 
 with col_brand:
     st.markdown("""
-    <div class="topbar" style="border-bottom:none;padding-right:0">
+    <div class="topbar" style="border-bottom:none;padding-right:0;padding-top:18px;padding-bottom:18px">
       <div class="brand">
         <div class="shield-icon">🛡️</div>
         <div>
