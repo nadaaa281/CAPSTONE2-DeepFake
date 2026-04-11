@@ -140,7 +140,7 @@ def _load_image_model():
         return
 
     _IMAGE_DEVICE = _get_device()
-    ckpt = torch.load("models/image_resnet18_best.pt", map_location="cpu")
+    ckpt = torch.load(Path(__file__).parent.parent / "models" / "image_resnet18_best.pt", map_location="cpu")
 
     img_size = int(ckpt.get("img_size", 160))
     _IMAGE_CLASSES = ckpt.get("classes", ["fake", "real"])
