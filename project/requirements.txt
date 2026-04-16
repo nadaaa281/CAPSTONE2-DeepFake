@@ -13,5 +13,6 @@ openai
 reportlab
 mediapipe
 opencv-python-headless
+gdown
 dash>=2.16.0
 plotly>=5.20.0
