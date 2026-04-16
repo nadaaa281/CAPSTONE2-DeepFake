@@ -8,7 +8,9 @@ import librosa
 import joblib
 from scipy.sparse import hstack, csr_matrix
 
-import whisper  # Python API (reliable on Streamlit Cloud)
+import whisper
+
+from src.llm_explainer import extract_frames, generate_explanation, generate_visual_explanation
 
 MODEL_DIR = Path(__file__).parent.parent / "models" / "best_text_audio_mfcc"
 _WHISPER_MODEL = None
@@ -25,11 +27,9 @@ def run_ffmpeg_extract_audio(video_path: str, wav_out: str):
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def run_whisper_transcribe(wav_path: str) -> str:
-    # Load once per server process (faster + stable)
     global _WHISPER_MODEL
     if _WHISPER_MODEL is None:
         _WHISPER_MODEL = whisper.load_model("base")
-
     try:
         res = _WHISPER_MODEL.transcribe(wav_path, fp16=False, language="en", task="transcribe")
         return (res.get("text") or "").strip()
@@ -44,6 +44,10 @@ def mfcc_stats(wav_path: str, sr: int, n_mfcc: int) -> np.ndarray:
     feat = np.concatenate([mfcc.mean(axis=1), mfcc.std(axis=1)], axis=0)
     return feat.astype(np.float32)
 
+
+# =========================
+# VIDEO DEEPFAKE
+# =========================
 def predict_video(video_file_path: str):
     vec, scaler, clf, meta = load_bundle()
     sr = int(meta["sr"])
@@ -65,17 +69,30 @@ def predict_video(video_file_path: str):
         pred_idx = int(np.argmax(proba))
         pred_label = inv[pred_idx]
 
+        prob_real = round(float(proba[0]) * 100, 2)
+        prob_fake = round(float(proba[1]) * 100, 2)
+
+        # LLM: transcript-based explanation
+        text_explanation = generate_explanation(transcript, prob_real, prob_fake)
+
+        # LLM: frame-based visual explanation
+        frames = extract_frames(video_file_path, num_frames=3)
+        visual_explanation = generate_visual_explanation(frames, prob_real, prob_fake, transcript)
+
         return {
-            "modality": "video",  # added (safe)
+            "modality": "video",
             "prediction": pred_label,
             "confidence": float(proba[pred_idx]),
             "prob_real": float(proba[0]),
             "prob_fake": float(proba[1]),
-            "transcript": transcript
+            "transcript": transcript,
+            "explanation": text_explanation,
+            "visual_explanation": visual_explanation
         }
 
+
 # =========================
-# AUDIO DEEPFAKE (added)
+# AUDIO DEEPFAKE
 # =========================
 def predict_audio(audio_file_path: str):
     vec, scaler, clf, meta = load_bundle()
@@ -86,7 +103,6 @@ def predict_audio(audio_file_path: str):
     with tempfile.TemporaryDirectory() as td:
         wav_path = str(Path(td) / "audio.wav")
 
-        # Convert to 16k mono wav if needed
         if audio_file_path.lower().endswith(".wav"):
             Path(wav_path).write_bytes(Path(audio_file_path).read_bytes())
         else:
@@ -104,21 +120,29 @@ def predict_audio(audio_file_path: str):
         pred_idx = int(np.argmax(proba))
         pred_label = inv[pred_idx]
 
+        prob_real = round(float(proba[0]) * 100, 2)
+        prob_fake = round(float(proba[1]) * 100, 2)
+
+        # LLM: transcript-based explanation only (no frames for audio)
+        text_explanation = generate_explanation(transcript, prob_real, prob_fake)
+
         return {
             "modality": "audio",
             "prediction": pred_label,
             "confidence": float(proba[pred_idx]),
             "prob_real": float(proba[0]),
             "prob_fake": float(proba[1]),
-            "transcript": transcript
+            "transcript": transcript,
+            "explanation": text_explanation
         }
 
+
 # =========================
-# IMAGE DEEPFAKE (SAFE ADD)
+# IMAGE DEEPFAKE
 # =========================
 import torch
 import torch.nn as nn
-from torchvision import models, transforms  # added (required)
+from torchvision import models, transforms
 from PIL import Image
 import numpy as np
 
@@ -140,39 +164,4 @@ def _load_image_model():
         return
 
     _IMAGE_DEVICE = _get_device()
-    ckpt = torch.load(Path(__file__).parent.parent / "models" / "image_resnet18_best.pt", map_location="cpu")
-
-    img_size = int(ckpt.get("img_size", 160))
-    _IMAGE_CLASSES = ckpt.get("classes", ["fake", "real"])
-
-    model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
-    model.fc = nn.Linear(model.fc.in_features, 2)
-    model.load_state_dict(ckpt["state_dict"])
-    model.eval().to(_IMAGE_DEVICE)
-
-    _IMAGE_TFM = transforms.Compose([
-        transforms.Resize((img_size, img_size)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225]),
-    ])
-
-    _IMAGE_MODEL = model
-
-@torch.no_grad()
-def predict_image(pil_image):
-    _load_image_model()
-
-    x = _IMAGE_TFM(pil_image.convert("RGB")).unsqueeze(0).to(_IMAGE_DEVICE)
-    logits = _IMAGE_MODEL(x)
-    probs = torch.softmax(logits, dim=1).squeeze().cpu().tolist()
-
-    idx = int(np.argmax(probs))
-    label = _IMAGE_CLASSES[idx]
-
-    return {
-        "modality": "image",
-        "prediction": label,
-        "confidence": float(probs[idx]),
-        "prob_real": float(probs[_IMAGE_CLASSES.index("real")]),
-        "prob_fake": float(probs[_IMAGE_CLASSES.index("fake")]),
-    }
+    ckpt = torch.load(Path(__file__
