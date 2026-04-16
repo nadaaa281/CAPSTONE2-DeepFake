@@ -11,8 +11,7 @@ torchvision
 tiktoken
 openai
 reportlab
-reportlab
-reportlab
-reportlab
+mediapipe
+opencv-python-headless
 dash>=2.16.0
 plotly>=5.20.0
