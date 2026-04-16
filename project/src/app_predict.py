@@ -15,7 +15,7 @@ import whisper
 from src.llm_explainer import extract_frames, generate_explanation, generate_visual_explanation
 
 MODEL_DIR = Path(__file__).parent.parent / "models" / "best_text_audio_mfcc"
-IMAGE_MODEL_PATH = Path(__file__).parent.parent / "models" / "resnet_image" / "resnet_model.pth"
+IMAGE_MODEL_PATH = Path(__file__).parent.parent / "models" / "best_model_image_combined.pth"
 
 _WHISPER_MODEL = None
 
@@ -24,14 +24,7 @@ _WHISPER_MODEL = None
 # AUTO-DOWNLOAD IMAGE MODEL IF MISSING
 # ─────────────────────────────────────────
 def _ensure_image_model_downloaded():
-    if not IMAGE_MODEL_PATH.exists():
-        IMAGE_MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-        import gdown
-        file_id = "PASTE_YOUR_FILE_ID_HERE"  # ← Replace this with your Google Drive file ID
-        url = f"https://drive.google.com/uc?id={file_id}"
-        print(f"Downloading ResNet model from Google Drive...")
-        gdown.download(url, str(IMAGE_MODEL_PATH), quiet=False)
-        print("Download complete.")
+    pass  # Model already in repo
 
 
 # ─────────────────────────────────────────
@@ -311,7 +304,7 @@ def _get_device():
     return torch.device("cpu")
 
 def _load_image_model():
-    _ensure_image_model_downloaded()  # ← Download model if not present
+    _ensure_image_model_downloaded()
 
     global _IMAGE_MODEL, _IMAGE_TFM, _IMAGE_CLASSES, _IMAGE_DEVICE
     if _IMAGE_MODEL is not None:
