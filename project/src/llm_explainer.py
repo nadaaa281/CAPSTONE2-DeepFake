@@ -1,13 +1,20 @@
 import os
 import base64
 import cv2
-import streamlit as st
-from openai import OpenAI
 from PIL import Image
 import io
 
-api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
-client = OpenAI(api_key=api_key)
+# ── Lazy client — initialized only when first needed, not at import time ──────
+_client = None
+
+def _get_client():
+    global _client
+    if _client is None:
+        import streamlit as st
+        from openai import OpenAI
+        api_key = os.getenv("OPENAI_API_KEY") or st.secrets.get("OPENAI_API_KEY")
+        _client = OpenAI(api_key=api_key)
+    return _client
 
 
 # ─────────────────────────────────────────
@@ -15,8 +22,8 @@ client = OpenAI(api_key=api_key)
 # ─────────────────────────────────────────
 def extract_frames(video_path: str, num_frames: int = 3) -> list:
     """Extract evenly spaced frames from a video as base64 strings."""
-    cap = cv2.VideoCapture(video_path)
-    total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    cap    = cv2.VideoCapture(video_path)
+    total  = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     indices = [int(total * i / num_frames) for i in range(num_frames)]
 
     frames_b64 = []
@@ -25,8 +32,7 @@ def extract_frames(video_path: str, num_frames: int = 3) -> list:
         ret, frame = cap.read()
         if not ret:
             continue
-        # Convert BGR → RGB → PIL → base64
-        img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        img    = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
         buffer = io.BytesIO()
         img.save(buffer, format="JPEG")
         b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
@@ -40,12 +46,13 @@ def extract_frames(video_path: str, num_frames: int = 3) -> list:
 # EXPLANATION — TEXT ONLY (audio/transcript)
 # ─────────────────────────────────────────
 def generate_explanation(transcript: str, real_prob: float, fake_prob: float) -> str:
+    client = _get_client()
     prompt = f"""
 You are a deepfake detection expert.
 
 A model analyzed a media file and produced:
-- REAL probability: {real_prob}%
-- FAKE probability: {fake_prob}%
+- REAL probability: {real_prob:.2f}%
+- FAKE probability: {fake_prob:.2f}%
 
 Transcript (if available):
 \"\"\"{transcript}\"\"\"
@@ -63,10 +70,9 @@ Keep the explanation concise (3–5 sentences).
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.4
+            temperature=0.4,
         )
         return response.choices[0].message.content
-
     except Exception:
         return (
             "Explanation could not be generated due to an error with the AI service. "
@@ -79,21 +85,21 @@ Keep the explanation concise (3–5 sentences).
 # ─────────────────────────────────────────
 def generate_visual_explanation(
     frames_b64: list,
-    real_prob: float,
-    fake_prob: float,
-    transcript: str = ""
+    real_prob:  float,
+    fake_prob:  float,
+    transcript: str = "",
 ) -> str:
     """Send extracted frames to GPT-4o Vision for visual deepfake explanation."""
+    client = _get_client()
 
-    # Build the message content with images
     content = [
         {
             "type": "text",
             "text": f"""You are a deepfake detection expert analyzing video frames.
 
 The detection model produced:
-- REAL probability: {real_prob}%
-- FAKE probability: {fake_prob}%
+- REAL probability: {real_prob:.2f}%
+- FAKE probability: {fake_prob:.2f}%
 
 Transcript (if available): {transcript}
 
@@ -106,28 +112,24 @@ Focus on:
 - Skin texture anomalies
 
 Keep the explanation concise (3–5 sentences).
-"""
+""",
         }
     ]
 
-    # Attach each frame as a vision image
     for b64 in frames_b64:
         content.append({
             "type": "image_url",
-            "image_url": {
-                "url": f"data:image/jpeg;base64,{b64}"
-            }
+            "image_url": {"url": f"data:image/jpeg;base64,{b64}"},
         })
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",          # Vision capable model
+            model="gpt-4o",
             messages=[{"role": "user", "content": content}],
             temperature=0.4,
-            max_tokens=300
+            max_tokens=300,
         )
         return response.choices[0].message.content
-
     except Exception:
         return (
             "Visual explanation could not be generated due to an error with the AI service. "
