@@ -4,20 +4,20 @@ from pathlib import Path
 from src.app_predict import predict_video, predict_image, predict_audio
 from src.llm_explainer import generate_explanation
 from PIL import Image
-
+ 
 st.set_page_config(page_title="Detection", page_icon="🔍", layout="wide")
-
+ 
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 with open(os.path.join(BASE_DIR, "assets/cyber.css")) as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
+ 
 if "result" not in st.session_state:
     st.session_state["result"] = None
-
+ 
 # ── Top bar ───────────────────────────────────────────────────────────────────
 st.markdown("###### CYBERSECURITY &nbsp;/&nbsp; DETECTION")
-
+ 
 col_title, col_status = st.columns([4, 1], vertical_alignment="top")
 with col_title:
     st.title("🛡️ Detection")
@@ -25,9 +25,9 @@ with col_title:
 with col_status:
     st.success("⬤  SYSTEM ONLINE")
     st.caption("FFmpeg • Whisper • v2.4.1")
-
+ 
 st.markdown("---")
-
+ 
 # ── Mode selector ─────────────────────────────────────────────────────────────
 mode = st.radio(
     "Media type",
@@ -35,9 +35,9 @@ mode = st.radio(
     horizontal=True,
     label_visibility="collapsed",
 )
-
+ 
 st.markdown("")
-
+ 
 # ── Step tracker ──────────────────────────────────────────────────────────────
 st.markdown("""
 <div style="display:flex;align-items:center;gap:0;margin-bottom:20px;">
@@ -62,10 +62,10 @@ st.markdown("""
   </div>
 </div>
 """, unsafe_allow_html=True)
-
+ 
 # ── Upload + settings layout ──────────────────────────────────────────────────
 upload_col, settings_col = st.columns([3, 1], vertical_alignment="top")
-
+ 
 with settings_col:
     with st.container(border=True):
         st.caption("ANALYSIS SETTINGS")
@@ -75,7 +75,7 @@ with settings_col:
         st.toggle("Transcript (Whisper)", value=True)
         st.caption("Clip length: 5–15 sec recommended")
         st.caption("Model: v2.4.1")
-
+ 
 # =========================
 # VIDEO
 # =========================
@@ -88,14 +88,14 @@ if mode == "Video":
         )
         if uploaded:
             st.video(uploaded.getvalue())
-
+ 
     st.markdown("")
     run_col, info_col = st.columns([2, 3], vertical_alignment="center")
     with run_col:
         run = st.button("▶  Run Detection", disabled=(uploaded is None), use_container_width=True)
     with info_col:
         st.caption("ℹ️  Max **200MB** per file · results in ~30 sec")
-
+ 
     if run and uploaded:
         with st.spinner("Processing video..."):
             with tempfile.TemporaryDirectory() as td:
@@ -114,9 +114,9 @@ if mode == "Video":
                     print("LLM ERROR (Video):", e)
         st.session_state["result"] = result
         st.switch_page("pages/2_Results.py")
-
+ 
 # =========================
-# IMAGE
+# IMAGE  ← FIXED: now uses generate_image_explanation via predict_image()
 # =========================
 elif mode == "Image":
     with upload_col:
@@ -128,30 +128,23 @@ elif mode == "Image":
         if img_file:
             pil_img = Image.open(img_file)
             st.image(pil_img, use_container_width=True)
-
+ 
     st.markdown("")
     run_col, info_col = st.columns([2, 3], vertical_alignment="center")
     with run_col:
         run_img = st.button("▶  Run Detection", disabled=(img_file is None), use_container_width=True)
     with info_col:
         st.caption("ℹ️  JPG / PNG · results in ~10 sec")
-
+ 
     if run_img and img_file:
         with st.spinner("Analyzing image..."):
             result = predict_image(pil_img)
-            try:
-                explanation = generate_explanation(
-                    "Image input (no transcript available)",
-                    result.get("prob_real", 0) * 100,
-                    result.get("prob_fake", 0) * 100,
-                )
-                result["llm_explanation"] = explanation
-            except Exception as e:
-                result["llm_explanation"] = f"AI explanation unavailable: {e}"
-                print("LLM ERROR (Image):", e)
+            # predict_image() already calls generate_image_explanation() internally
+            # and stores the result in result["explanation"] — just pass it through
+            result["llm_explanation"] = result.get("explanation", "AI explanation unavailable.")
         st.session_state["result"] = result
         st.switch_page("pages/2_Results.py")
-
+ 
 # =========================
 # AUDIO
 # =========================
@@ -164,14 +157,14 @@ elif mode == "Audio":
         )
         if audio_file:
             st.audio(audio_file.getvalue())
-
+ 
     st.markdown("")
     run_col, info_col = st.columns([2, 3], vertical_alignment="center")
     with run_col:
         run_audio = st.button("▶  Run Detection", disabled=(audio_file is None), use_container_width=True)
     with info_col:
         st.caption("ℹ️  WAV, MP3, M4A · results in ~20 sec")
-
+ 
     if run_audio and audio_file:
         with st.spinner("Processing audio..."):
             with tempfile.TemporaryDirectory() as td:
