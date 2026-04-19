@@ -56,11 +56,11 @@ transcript = r.get("transcript", "") or ""
 llm_expl  = r.get("llm_explanation", "")
  
 if modality == "image":
-    expl = "Prediction is computed from the uploaded image using your trained ResNet model."
+    expl = "Prediction is computed from the uploaded image using your trained MobileNetV3 model."
 elif modality == "audio":
     expl = "Prediction is computed using audio MFCC features with your trained classifier."
 else:
-    expl = "Prediction is computed using transcript + MFCC features with your trained model."
+    expl = "Prediction is computed using transcript + MFCC features with your trained MobileNetV3 model."
  
 is_fake = pred == "FAKE"
 verdict_color  = "#E24B4A" if is_fake else "#1D9E75"
