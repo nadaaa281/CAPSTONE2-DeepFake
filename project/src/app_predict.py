@@ -442,7 +442,7 @@ def predict_audio(audio_file_path: str) -> dict:
  
  
 # =========================
-# IMAGE DEEPFAKE
+# IMAGE DEEPFAKE  ← UPDATED: threshold 0.5 → 0.35, weights 0.70/0.30 → 0.80/0.20
 # =========================
 def predict_image(pil_img: Image.Image) -> dict:
     _load_image_model()
@@ -457,10 +457,11 @@ def predict_image(pil_img: Image.Image) -> dict:
  
     geo_fake = face_geometry_score_image(pil_img)
  
-    final_fake = round(0.70 * model_fake + 0.30 * geo_fake, 4)
+    # Increased model weight + lowered threshold to catch modern AI-generated images
+    final_fake = round(0.80 * model_fake + 0.20 * geo_fake, 4)
     final_real = round(1.0 - final_fake, 4)
-    pred_label = "FAKE" if final_fake >= 0.5 else "REAL"
-    confidence = final_fake if final_fake >= 0.5 else final_real
+    pred_label = "FAKE" if final_fake >= 0.35 else "REAL"
+    confidence = final_fake if final_fake >= 0.35 else final_real
  
     # ── GPT-4o Vision explanation for image ──────
     visual_explanation = generate_image_explanation(
@@ -479,4 +480,3 @@ def predict_image(pil_img: Image.Image) -> dict:
         "explanation":       visual_explanation,
         "score_face_geo":    round(1.0 - geo_fake, 4),
     }
- 
