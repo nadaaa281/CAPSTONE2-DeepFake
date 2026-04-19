@@ -475,16 +475,14 @@ def predict_image(pil_img: Image.Image) -> dict:
         proba  = torch.softmax(logits, dim=1)[0].cpu().numpy()
  
     # friend's image model: index 0 = fake, index 1 = real
-    model_fake = float(proba[0])
+    # Use her score directly for prediction — don't mix in other signals
+    final_fake = round(float(proba[0]), 4)
+    final_real = round(float(proba[1]), 4)
+    pred_label = "FAKE" if final_fake >= 0.5 else "REAL"
+    confidence = final_fake if final_fake >= 0.5 else final_real
  
-    # ── Your face geometry signal ─────────────────
+    # ── Your face geometry signal (analysis only) ─
     geo_fake = face_geometry_score_image(pil_img)
- 
-    # ── Combine (your weights + lowered threshold) ─
-    final_fake = round(0.80 * model_fake + 0.20 * geo_fake, 4)
-    final_real = round(1.0 - final_fake, 4)
-    pred_label = "FAKE" if final_fake >= 0.35 else "REAL"
-    confidence = final_fake if final_fake >= 0.35 else final_real
  
     # ── LLM visual explanation ────────────────────
     visual_explanation = generate_image_explanation(pil_img, final_real * 100, final_fake * 100)
@@ -499,3 +497,4 @@ def predict_image(pil_img: Image.Image) -> dict:
         "explanation":    visual_explanation,
         "score_face_geo": round(1.0 - geo_fake, 4),
     }
+ 
